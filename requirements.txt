@@ -2,7 +2,7 @@ Flask
 python-dotenv
 pdfplumber
 PyMuPDF
-numpy
+numpy<2
 sentence-transformers
 google-generativeai
 torch==2.1.0+cpu
