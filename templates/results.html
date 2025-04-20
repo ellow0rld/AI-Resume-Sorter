@@ -1,0 +1,49 @@
+<!-- results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='des2.css') }}">
+    <title>Ranking Results</title>
+</head>
+<body>
+    {% if ranks %}
+    <div class="container">
+        <h1>Ranking Results</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Resume File Name</th>
+                    <th>Final Score</th>
+                    <th>Explanation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for rank in ranks %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        <a href="{{ rank.highlighted_link }}" target="_blank">
+                            {{ rank.filename }}
+                        </a>
+                    </td>
+                    <td>{{ "%.2f" % rank.score }}</td>
+                    <td>
+                        <strong>Context based Score:</strong> {{ rank.explanation["Context based Score"] }} <br>
+                        <strong>Keyword based Score:</strong> {{ rank.explanation["Keyword based Score"] }} <br>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="container">
+        <h1>No results available.</h1>
+    </div>
+    {% endif %}
+</body>
+</html>

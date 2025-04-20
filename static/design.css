@@ -1,0 +1,64 @@
+/* Criteria Styling */
+.criterion {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    background: #f9f9f9;
+}
+
+.criterion label {
+    font-weight: bold; /* Make criteria bold */
+    font-size: 18px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.criterion-weight {
+    font-size: 16px;
+}
+
+/* Subcriteria Styling */
+ul {
+    padding-left: 20px; /* Indent subcriteria */
+}
+
+.subcriterion-name {
+    font-size: 14px; /* Reduce font size */
+}
+
+.subcriterion-weight {
+    font-size: 14px; /* Reduce font size */
+}
+
+/* Button Styling */
+button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s ease;
+}
+
+button:hover {
+    background: #2980b9;
+}
+
+/* Add and Remove Buttons */
+.add-subcriterion,
+.remove-subcriterion,
+.remove-criterion {
+    background: #e74c3c;
+    font-size: 12px;
+}
+
+.add-subcriterion {
+    background: #2ecc71;
+}
+
+.remove-criterion {
+    background: #c0392b;
+}
