@@ -1,0 +1,7 @@
+Flask==3.0.2
+python-dotenv==1.0.1
+pdfplumber==0.10.3
+PyMuPDF==1.23.20
+numpy==1.26.4
+sentence-transformers==2.6.1
+google-generativeai==0.3.2
