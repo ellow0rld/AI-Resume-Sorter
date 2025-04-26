@@ -71,13 +71,11 @@ def extract_summary_gemini(job_description):
     return summary
 
 def sbert_match_score(weighted_requirements, resume_text, summary):
-    """Computes the weighted semantic similarity between job requirements and a resume."""
     if not weighted_requirements or not resume_text.strip():
         return 0.0
 
     req_texts, weights = zip(*weighted_requirements.items())
     weights = np.array(weights)
-    # Encode job requirements and resume text
     sum_embeddings = sbert_model.encode(summary, convert_to_tensor=True)
     req_embeddings = sbert_model.encode(req_texts, convert_to_tensor=True)
     resume_embedding = sbert_model.encode(resume_text, convert_to_tensor=True)
@@ -223,4 +221,4 @@ def results():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
