@@ -49,15 +49,18 @@ pipeline {
         }
 
         stage('Deploy Flask App') {
-            steps {
-                withCredentials([
-                    sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY_PATH'),
-                    string(credentialsId: 'GEMINI_API_KEY', variable: 'GEMINI_API_KEY')
-                ]) {
-                    sh 'chmod +x deploy.sh'
-                    sh "./deploy.sh ${EC2_IP} ${SSH_KEY_PATH} '${GEMINI_API_KEY}'"
-                }
-            }
+    steps {
+        withCredentials([
+            sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY_PATH'),
+            string(credentialsId: 'GEMINI_API_KEY', variable: 'GEMINI_API_KEY')
+        ]) {
+            sh '''
+                chmod +x deploy.sh
+                ./deploy.sh "$EC2_IP" "$SSH_KEY_PATH" "$GEMINI_API_KEY"
+            '''
         }
+    }
+}
+
     }
 }
