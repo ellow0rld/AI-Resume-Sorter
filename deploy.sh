@@ -4,11 +4,14 @@ EC2_IP=$1
 SSH_KEY_PATH=$2
 GEMINI_API_KEY=$3
 
-# Example: copying files and running remote commands
-scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no -r app ec2-user@"$EC2_IP":~/app
+echo "Deploying to $EC2_IP..."
+
+scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no app.py ec2-user@"$EC2_IP":~/app.py
+scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no requirements.txt ec2-user@"$EC2_IP":~/requirements.txt
+
 ssh -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no ec2-user@"$EC2_IP" << EOF
+    sudo yum install -y python3 python3-pip
+    pip3 install -r requirements.txt
     export GEMINI_API_KEY="$GEMINI_API_KEY"
-    cd ~/app
-    pip install -r requirements.txt
-    nohup python3 app.py &
+    nohup python3 app.py > output.log 2>&1 &
 EOF
