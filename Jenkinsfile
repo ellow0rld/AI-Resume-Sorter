@@ -50,7 +50,7 @@ pipeline {
 
         stage('Deploy Flask App') {
     steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY_PATH')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'C:\Users\madhu\Downloads\aws-terraform.pem')]) {
                     script {
                         // Now the SSH key is securely available as $SSH_KEY_PATH
                         sh """
