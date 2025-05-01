@@ -56,7 +56,7 @@ pipeline {
                         bat """
                             copy /Y "%SSH_KEY_PATH%" "${safeKeyPath}"
                             icacls "${safeKeyPath}" /inheritance:r
-                            icacls "${safeKeyPath}" /grant:r "%USERNAME%:R"
+                            icacls "${safeKeyPath}" /grant:r "%Madhu Shree Aravindan%:R"
                         """
                         env.SAFE_SSH_KEY = safeKeyPath
                     }
