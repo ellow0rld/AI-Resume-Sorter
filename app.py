@@ -11,8 +11,10 @@ from sentence_transformers import SentenceTransformer, util
 import google.generativeai as genai
 import json
 
-
-genai.configure(api_key="AIzaSyDRzUidjMLSGoWok7ooNNZHbciMpgizqC0")
+# Configure Gemini API
+load_dotenv()
+api_key = os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=api_key)
 model = genai.GenerativeModel("gemini-2.0-flash")
 # Load Sentence Transformers for similarity scoring
 sbert_model = SentenceTransformer("all-mpnet-base-v2")
