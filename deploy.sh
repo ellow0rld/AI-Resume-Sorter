@@ -1,16 +1,14 @@
 #!/bin/bash
 
 EC2_IP=$1
-API_KEY=$2
+SSH_KEY_PATH=$2
+GEMINI_API_KEY=$3
 
-# Copy app to EC2
-scp -o StrictHostKeyChecking=no -i ~/.ssh/your-key.pem -r app ec2-user@$EC2_IP:/home/ec2-user/
-scp -o StrictHostKeyChecking=no -i ~/.ssh/your-key.pem requirements.txt ec2-user@$EC2_IP:/home/ec2-user/
-
-# Run commands on EC2
-ssh -o StrictHostKeyChecking=no -i ~/.ssh/your-key.pem ec2-user@$EC2_IP << EOF
-cd /home/ec2-user/app
-echo "GEMINI_API_KEY=$API_KEY" > .env
-pip3 install -r /home/ec2-user/requirements.txt
-nohup python3 main.py &
+# Example: copying files and running remote commands
+scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no -r app ec2-user@"$EC2_IP":~/app
+ssh -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no ec2-user@"$EC2_IP" << EOF
+    export GEMINI_API_KEY="$GEMINI_API_KEY"
+    cd ~/app
+    pip install -r requirements.txt
+    nohup python3 app.py &
 EOF
