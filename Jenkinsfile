@@ -2,83 +2,46 @@ pipeline {
     agent any
 
     environment {
-        TF_VERSION = "1.7.0"
-        TF_CLI_ARGS_apply = "-auto-approve"
-        AWS_REGION = "us-east-1"
+        GEMINI_API_KEY = credentials('GEMINI_API_KEY')
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/ellow0rld/AI-Resume-Sorter.git/'
+                git 'https://github.com/ellow0rld/AI-Resume-Sorter.git'
             }
         }
 
-        stage('Setup AWS Credentials') {
+        stage('Terraform Init') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    echo "AWS credentials injected for us-east-1"
-                }
-            }
-        }
-
-        stage('Check AWS Identity') {
-    steps {
-        withCredentials([
-            string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-            string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-        ]) {
-            sh 'aws sts get-caller-identity'
-        }
-    }
-}
-
-        stage('Initialize Terraform') {
-            steps {
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
+                dir('terraform') {
                     sh 'terraform init'
                 }
             }
         }
 
-        stage('Plan Terraform Changes') {
+        stage('Terraform Apply') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    sh 'terraform plan -out=tfplan'
+                dir('terraform') {
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
 
-        stage('Apply Terraform Changes') {
+        stage('Extract EC2 IP') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    sh 'terraform apply tfplan'
+                script {
+                    def ec2_ip = sh(script: "terraform -chdir=terraform output -raw public_ip", returnStdout: true).trim()
+                    env.EC2_IP = ec2_ip
                 }
             }
         }
-    }
 
-    post {
-        always {
-            archiveArtifacts artifacts: 'terraform.tfstate', fingerprint: true
-        }
-        failure {
-            echo "Terraform deployment failed!"
-        }
-        success {
-            echo "Terraform deployment successful!"
+        stage('Deploy Flask App') {
+            steps {
+                sh 'chmod +x deploy.sh'
+                sh "./deploy.sh ${EC2_IP} '${GEMINI_API_KEY}'"
+            }
         }
     }
 }
