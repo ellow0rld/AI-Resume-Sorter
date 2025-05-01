@@ -50,7 +50,7 @@ pipeline {
 
         stage('Deploy Flask App') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY_PATH')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'C:/Users/madhu/Downloads/aws-terraform.pem')]) {
                     script {
                         // Convert the Windows path to a Linux-compatible format if necessary
                         def linuxSSHKeyPath = SSH_KEY_PATH.replaceAll("\\\\", "/")
