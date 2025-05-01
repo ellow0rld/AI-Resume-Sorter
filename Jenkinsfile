@@ -51,14 +51,6 @@ pipeline {
         stage('Deploy Flask App') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY_PATH')]) {
-                    script {
-                        def safeKeyPath = "${env.WORKSPACE}\\safe-key.pem"
-                        bat """
-                            copy /Y "%SSH_KEY_PATH%" "${safeKeyPath}"
-                            icacls "${safeKeyPath}" /inheritance:r
-                        """
-                        env.SAFE_SSH_KEY = safeKeyPath
-                    }
 
                     bat """
                         scp -i %SAFE_SSH_KEY% -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null app.py ec2-user@%EC2_IP%:/home/ec2-user/
