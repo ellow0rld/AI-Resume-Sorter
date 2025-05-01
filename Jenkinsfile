@@ -31,7 +31,7 @@ pipeline {
                             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
                             export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
                             terraform apply -auto-approve
-                            terraform show  # Debug output
+                            terraform show
                         '''
                     }
                 }
@@ -51,18 +51,12 @@ pipeline {
         stage('Deploy Flask App') {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY_PATH')]) {
-                    script {
-                        // Ensure that the path is used correctly in Unix format
-                        def linuxSSHKeyPath = SSH_KEY_PATH.replaceAll("\\\\", "/")
-
-                        // Now the SSH key is securely available as $linuxSSHKeyPath
-                        sh """
-                            chmod 400 \$linuxSSHKeyPath  # Ensure the key has proper permissions
-                            scp -i \$linuxSSHKeyPath -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null app.py ec2-user@\$EC2_IP:/home/ec2-user/
-                            ssh -i \$linuxSSHKeyPath -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@\$EC2_IP 'sudo yum install -y python3 python3-pip && pip3 install --user -r requirements.txt'
-                            ssh -i \$linuxSSHKeyPath -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@\$EC2_IP 'nohup python3 app.py > output.log 2>&1 &'
-                        """
-                    }
+                    sh """
+                        chmod 400 \$SSH_KEY_PATH
+                        scp -i \$SSH_KEY_PATH -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null app.py ec2-user@\$EC2_IP:/home/ec2-user/
+                        ssh -i \$SSH_KEY_PATH -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@\$EC2_IP 'sudo yum install -y python3 python3-pip && pip3 install --user -r requirements.txt'
+                        ssh -i \$SSH_KEY_PATH -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@\$EC2_IP 'nohup python3 app.py > output.log 2>&1 &'
+                    """
                 }
             }
         }
