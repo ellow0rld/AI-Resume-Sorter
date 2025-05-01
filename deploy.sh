@@ -6,13 +6,11 @@ GEMINI_API_KEY=$3
 
 echo "Deploying to $EC2_IP..."
 
-# Copy all necessary files to the EC2 instance
-scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no app.py ec2-user@"$EC2_IP":~/app.py
-scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no requirements.txt ec2-user@"$EC2_IP":~/requirements.txt
-scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no -r templates static ec2-user@"$EC2_IP":~/
+scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null app.py ec2-user@"$EC2_IP":~/
+scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null requirements.txt ec2-user@"$EC2_IP":~/
+scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null -r templates static ec2-user@"$EC2_IP":~/
 
-# SSH into EC2 and start the Flask app
-ssh -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no ec2-user@"$EC2_IP" << EOF
+ssh -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@"$EC2_IP" << EOF
     sudo yum install -y python3 python3-pip
     pip3 install --user -r requirements.txt
     export GEMINI_API_KEY="$GEMINI_API_KEY"
