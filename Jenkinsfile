@@ -42,7 +42,7 @@ pipeline {
             steps {
                 script {
                     def ec2_ip = sh(script: "terraform -chdir=terraform output -raw public_ip", returnStdout: true).trim()
-                    echo "EC2 IP is: ${ec2_ip}"
+                    echo "✅ EC2 IP is: ${ec2_ip}"
                     env.EC2_IP = ec2_ip
                 }
             }
@@ -52,11 +52,22 @@ pipeline {
             steps {
                 withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY_PATH')]) {
                     script {
-                        // Now use the SSH key path correctly
+                        echo "🔑 SSH Key Path: ${SSH_KEY_PATH}"
+                        echo "📡 EC2 IP: ${env.EC2_IP}"
+
+                        // Check if SSH key file exists before running anything
+                        sh "ls -l ${SSH_KEY_PATH} || echo '❌ SSH key file not found at: ${SSH_KEY_PATH}'"
+
+                        // Run deployment commands
                         sh """
-                            scp -i ${env.SSH_KEY_PATH} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null app.py ec2-user@${env.EC2_IP}:/home/ec2-user/
-                            ssh -i ${env.SSH_KEY_PATH} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@${env.EC2_IP} "sudo yum install -y python3 python3-pip && pip3 install --user -r requirements.txt"
-                            ssh -i ${env.SSH_KEY_PATH} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@${env.EC2_IP} "nohup python3 app.py > output.log 2>&1 &"
+                            echo "📤 Copying app.py to EC2..."
+                            scp -i ${SSH_KEY_PATH} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null app.py ec2-user@${env.EC2_IP}:/home/ec2-user/
+
+                            echo "⚙️ Installing dependencies on EC2..."
+                            ssh -i ${SSH_KEY_PATH} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@${env.EC2_IP} "sudo yum install -y python3 python3-pip && pip3 install --user -r requirements.txt"
+
+                            echo "🚀 Starting Flask app..."
+                            ssh -i ${SSH_KEY_PATH} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@${env.EC2_IP} "nohup python3 app.py > output.log 2>&1 &"
                         """
                     }
                 }
