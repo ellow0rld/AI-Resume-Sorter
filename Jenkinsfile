@@ -50,24 +50,25 @@ pipeline {
 
         stage('Deploy Flask App') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY_PATH')]) {
+                withCredentials([file(credentialsId: 'ec2-ssh-key', variable: 'SSH_KEY_FILE')]) {
                     script {
-                        echo "🔑 SSH Key Path: ${SSH_KEY_PATH}"
                         echo "📡 EC2 IP: ${env.EC2_IP}"
-
-                        // Check if SSH key file exists before running anything
-                        sh "ls -l ${SSH_KEY_PATH} || echo '❌ SSH key file not found at: ${SSH_KEY_PATH}'"
-
-                        // Run deployment commands
                         sh """
-                            echo "📤 Copying app.py to EC2..."
-                            scp -i ${SSH_KEY_PATH} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null app.py ec2-user@${env.EC2_IP}:/home/ec2-user/
+                            echo '🔑 Using SSH key at: \$SSH_KEY_FILE'
+                            ls -l \$SSH_KEY_FILE || echo '❌ Key file not found.'
 
-                            echo "⚙️ Installing dependencies on EC2..."
-                            ssh -i ${SSH_KEY_PATH} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@${env.EC2_IP} "sudo yum install -y python3 python3-pip && pip3 install --user -r requirements.txt"
+                            echo '📤 Copying app.py to EC2...'
+                            scp -i \$SSH_KEY_FILE -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null app.py ec2-user@${env.EC2_IP}:/home/ec2-user/
 
-                            echo "🚀 Starting Flask app..."
-                            ssh -i ${SSH_KEY_PATH} -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@${env.EC2_IP} "nohup python3 app.py > output.log 2>&1 &"
+                            echo '⚙️ Installing dependencies...'
+                            ssh -i \$SSH_KEY_FILE -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@${env.EC2_IP} "sudo yum install -y python3 python3-pip && pip3 install --user -r requirements.txt"
+
+                            echo '🚀 Starting Flask app...'
+                            ssh -i \$SSH_KEY_FILE -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@${env.EC2_IP} "nohup python3 app.py > output.log 2>&1 &"
+
+                            echo '🔍 Checking if Flask app is live...'
+                            sleep 5
+                            curl -I http://${env.EC2_IP}:5000 || echo '❌ Could not reach Flask app'
                         """
                     }
                 }
