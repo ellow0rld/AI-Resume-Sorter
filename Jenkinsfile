@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        label 'linux'
-    }
+    agent any
 
     environment {
         GEMINI_API_KEY = credentials('GEMINI_API_KEY')
@@ -10,7 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/ellow0rld/AI-Resume-Sorter.git'
+                git 'https://github.com/ellow0rld/AI-Resume-Sorter.git'  
             }
         }
 
@@ -24,10 +22,8 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
+                withCredentials([string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                                  string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
                     dir('terraform') {
                         sh '''
                             export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
@@ -52,27 +48,23 @@ pipeline {
 
         stage('Deploy Flask App') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY_PATH', usernameVariable: 'SSH_USER')]) {
-                    script {
-                        echo '📡 EC2 IP: ' + env.EC2_IP
-                        sh '''
-                            echo "🔑 SSH Key Path: $SSH_KEY_PATH"
-                            ls -l "$SSH_KEY_PATH" || echo "❌ SSH key file not found!"
+                script {
+                    echo "📡 EC2 IP: ${env.EC2_IP}"
+                    
+                    sh """
+                        echo "📤 Copying app.py to EC2..."
+                        scp -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null app.py ec2-user@${EC2_IP}:/home/ec2-user/
 
-                            echo "📤 Copying app.py to EC2..."
-                            scp -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null app.py $SSH_USER@$EC2_IP:/home/ec2-user/
+                        echo "⚙️ Installing dependencies..."
+                        ssh -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@${EC2_IP} "sudo yum install -y python3 python3-pip && pip3 install --user -r requirements.txt"
 
-                            echo "⚙️ Installing dependencies..."
-                            ssh -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null $SSH_USER@$EC2_IP "sudo yum install -y python3 python3-pip && pip3 install --user -r requirements.txt"
+                        echo "🚀 Starting Flask app..."
+                        ssh -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null ec2-user@${EC2_IP} "nohup python3 /home/ec2-user/app.py > output.log 2>&1 &"
 
-                            echo "🚀 Starting Flask app..."
-                            ssh -i "$SSH_KEY_PATH" -o StrictHostKeyChecking=no -o IdentitiesOnly=yes -o UserKnownHostsFile=/dev/null $SSH_USER@$EC2_IP "nohup python3 app.py > output.log 2>&1 &"
-
-                            echo "🔍 Verifying deployment..."
-                            sleep 5
-                            curl -I http://$EC2_IP:5000 || echo "❌ Flask app is not responding."
-                        '''
-                    }
+                        echo "🔍 Verifying deployment..."
+                        sleep 5
+                        curl -I http://${EC2_IP}:5000 || echo "❌ Flask app is not responding."
+                    """
                 }
             }
         }
