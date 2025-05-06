@@ -5,5 +5,5 @@ PyMuPDF
 numpy<2
 sentence-transformers
 google-generativeai
-torch==2.1.0+cpu
+torch
 --extra-index-url https://download.pytorch.org/whl/cpu
