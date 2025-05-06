@@ -3,7 +3,7 @@ python-dotenv==1.0.1
 pdfplumber
 PyMuPDF
 numpy<2
-sentence-transformers==2.2.2
+sentence-transformers==2.6.1
 google-generativeai==0.5.4
 torch==2.1.0+cpu
 --extra-index-url https://download.pytorch.org/whl/cpu
