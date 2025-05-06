@@ -22,9 +22,10 @@ sbert_model = SentenceTransformer("all-mpnet-base-v2")
 app = Flask(__name__, static_url_path='/static')
 app.secret_key = "nn4w89u4hg89hf"
 
-UPLOAD_FOLDER = 'uploads'
-EXTRACT_FOLDER = 'extracted_resumes'
-HIGHLIGHTED_FOLDER = 'highlighted_resumes'
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+EXTRACT_FOLDER = os.path.join(BASE_DIR, 'extracted_resumes')
+HIGHLIGHTED_FOLDER = os.path.join(BASE_DIR, 'highlighted_resumes')
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(EXTRACT_FOLDER, exist_ok=True)
@@ -162,7 +163,7 @@ def upload_resumes():
 
         file = request.files['resumeZip']
         shutil.rmtree(EXTRACT_FOLDER, ignore_errors=True)
-        os.makedirs(EXTRACT_FOLDER)
+        os.makedirs(EXTRACT_FOLDER, exist_ok=True)
 
         if not file.filename.endswith('.zip'):
             return jsonify({"error": "Only ZIP files are allowed"}), 400
