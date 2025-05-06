@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         PORT = '5000'
-        APP_DIR = '/home/ec2-user/resume-sorter'
+        APP_DIR = '/var/lib/jenkins/resume-sorter'
         GEMINI_API_KEY = credentials('GEMINI_API_KEY') // Store this in Jenkins Credentials
     }
     stages {
