@@ -5,8 +5,8 @@ It's a website built using Flask, to rank student's resume based on the job desc
 # Similarity Score Calculation
 This project ranks resumes based on a job description using semantic similarity and keyword matching. Resumes and the job description are preprocessed to remove noise, irrelevant words, and standardize text, then converted into SBERT embeddings. Key skills and requirements are extracted from the job description using Gemini-2.0-Flash and dynamically weighted. Each resume is scored by combining a Context-Based Score (CBS) (cosine similarity between resume and job description embeddings) and a Keyword-Based Score (KBS):
 
-KBS = (Σ Matchᵢ × Weightᵢ) ÷ (Σ Weightᵢ)
-Total Score = α × KBS + (1 - α) × CBS, α = 0.4
+**KBS = (Σ Matchᵢ × Weightᵢ) ÷ (Σ Weightᵢ)
+Total Score = α × KBS + (1 - α) × CBS, α = 0.4**
 
 Resumes are ranked by total score, with matching keywords highlighted, and ties broken by the number of activities (projects, internships, research).
 
