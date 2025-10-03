@@ -17,4 +17,4 @@ Resumes are ranked by total score, with matching keywords highlighted, and ties 
 <img width="789" height="1020" alt="Screenshot 2025-04-23 192535" src="https://github.com/user-attachments/assets/525e1a73-5b3b-49ae-a66a-48cbdaaaa079" />
 
 # Output
-<img width="3300" height="1663" alt="Screenshot 2025-04-23 192514" src="https://github.com/user-attachments/assets/5a7898c5-46b3-4ee7-80b4-d6ae406a510a" />
+<img width="1070" height="1151" alt="Screenshot 2025-04-23 192514" src="https://github.com/user-attachments/assets/9306530f-1d56-4757-8617-30c90bf37eff" />
